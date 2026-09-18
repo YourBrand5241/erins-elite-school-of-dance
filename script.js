@@ -51,13 +51,68 @@ const SECTIONS = [
   { key: "conditioning", elementId: "list-conditioning" },
 ];
 
+const CLASS_CAPACITY = 20; // per class session — change here if it needs to differ later
+
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 if (window.emailjs) emailjs.init(EMAILJS_PUBLIC_KEY);
 
-let basket = []; // { id, name, dayTime, studio, price, type }
+let basket = []; // { id, name, dayTime, studio, price, type, qty, prorationLabel? }
+let enrollmentCounts = {}; // "name|dayTime" -> number currently enrolled
 
 function formatPrice(amount) {
   return `£${amount.toFixed(2)}`;
+}
+
+const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+function extractDayName(dayTimeStr) {
+  if (!dayTimeStr) return null;
+  return dayTimeStr.split(" ")[0];
+}
+
+function countOccurrencesOfDay(dayIndex, year, month, fromDay) {
+  const lastDay = new Date(year, month + 1, 0).getDate();
+  let count = 0;
+  for (let d = fromDay; d <= lastDay; d++) {
+    if (new Date(year, month, d).getDay() === dayIndex) count++;
+  }
+  return count;
+}
+
+// Works out how many sessions to charge for right now: whatever's left
+// this month, or — if none remain — every session in next month instead.
+function getProration(dayTimeStr) {
+  const dayName = extractDayName(dayTimeStr);
+  if (!dayName) return null;
+  const dayIndex = DAY_NAMES.indexOf(dayName);
+  const today = new Date();
+
+  let count = countOccurrencesOfDay(dayIndex, today.getFullYear(), today.getMonth(), today.getDate());
+  let monthLabel = today.toLocaleString("en-GB", { month: "long" });
+  let rolledOver = false;
+
+  if (count === 0) {
+    const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+    count = countOccurrencesOfDay(dayIndex, nextMonth.getFullYear(), nextMonth.getMonth(), 1);
+    monthLabel = nextMonth.toLocaleString("en-GB", { month: "long" });
+    rolledOver = true;
+  }
+
+  return { count, monthLabel, rolledOver, dayName };
+}
+
+async function loadEnrollmentCounts() {
+  const { data } = await supabaseClient
+    .from("public_class_enrollment_counts")
+    .select("item_name, day_time")
+    .eq("business_id", BUSINESS_ID);
+
+  enrollmentCounts = {};
+  (data || []).forEach(row => {
+    const key = `${row.item_name}|${row.day_time}`;
+    enrollmentCounts[key] = (enrollmentCounts[key] || 0) + 1;
+  });
+}
 }
 
 function renderCatalog() {
@@ -68,18 +123,36 @@ function renderCatalog() {
       const card = document.createElement("div");
       card.className = "product-card";
 
-      const isTBC = item.price === null || item.dayTime === null && item.type === "class";
-      const priceDisplay = item.price === null ? "Price TBC" : formatPrice(item.price);
+      const isTBC = item.price === null || (item.dayTime === null && item.type === "class");
+      const priceDisplay = item.price === null ? "Price TBC" : `${formatPrice(item.price)}/session`;
       const dayTimeDisplay = item.dayTime || (item.type === "class" ? "Day/time TBC" : "");
+
+      let prorationHtml = "";
+      let spotsHtml = "";
+      let isFull = false;
+
+      if (item.type === "class" && item.price !== null && item.dayTime) {
+        const p = getProration(item.dayTime);
+        const total = item.price * p.count;
+        prorationHtml = `<div class="product-desc">${p.count} session${p.count !== 1 ? "s" : ""} ${p.rolledOver ? "in" : "left in"} ${p.monthLabel}${p.rolledOver ? " (this month's have passed)" : ""} — <strong>Total: ${formatPrice(total)}</strong></div>`;
+
+        const key = `${item.name}|${item.dayTime}`;
+        const enrolled = enrollmentCounts[key] || 0;
+        const spotsLeft = CLASS_CAPACITY - enrolled;
+        isFull = spotsLeft <= 0;
+        spotsHtml = `<div class="product-desc">${isFull ? "Full" : `${spotsLeft} of ${CLASS_CAPACITY} spots left`}</div>`;
+      }
 
       card.innerHTML = `
         <div class="product-name">${item.name}</div>
         ${item.desc ? `<div class="product-desc">${item.desc}</div>` : ""}
         ${dayTimeDisplay ? `<div class="product-desc">${dayTimeDisplay}${item.studio ? ` — ${item.studio}` : ""}</div>` : ""}
         ${isTBC ? `<div class="product-tbc">Details to be confirmed</div>` : ""}
+        ${prorationHtml}
+        ${spotsHtml}
         <div class="product-footer">
           <span class="product-price">${priceDisplay}</span>
-          <button class="add-btn" data-id="${item.id}" ${item.price === null ? "disabled" : ""}>Add</button>
+          <button class="add-btn" data-id="${item.id}" ${item.price === null || isFull ? "disabled" : ""}>${isFull ? "Full" : "Add"}</button>
         </div>
       `;
       list.appendChild(card);
@@ -94,7 +167,25 @@ function renderCatalog() {
 function addToBasket(itemId) {
   const item = ITEMS.find(i => i.id === itemId);
   const existing = basket.find(b => b.id === itemId);
-  if (existing) {
+
+  if (item.type === "class") {
+    if (existing) {
+      alert("This class is already in your sign-up.");
+      return;
+    }
+    const key = `${item.name}|${item.dayTime}`;
+    const enrolled = enrollmentCounts[key] || 0;
+    if (CLASS_CAPACITY - enrolled <= 0) {
+      alert("Sorry, this class is full.");
+      return;
+    }
+    const p = getProration(item.dayTime);
+    basket.push({
+      id: item.id, name: item.name, dayTime: item.dayTime, studio: item.studio,
+      price: item.price, type: item.type, qty: p.count,
+      prorationLabel: `${p.count} session${p.count !== 1 ? "s" : ""} in ${p.monthLabel}`,
+    });
+  } else if (existing) {
     existing.qty += 1;
   } else {
     basket.push({ id: item.id, name: item.name, dayTime: item.dayTime, studio: item.studio, price: item.price, type: item.type, qty: 1 });
@@ -126,7 +217,7 @@ function renderBasket() {
     const row = document.createElement("div");
     row.className = "basket-row";
     row.innerHTML = `
-      <span>${item.qty} × ${item.name}${item.dayTime ? ` (${item.dayTime})` : ""}</span>
+      <span>${item.prorationLabel ? `${item.name} — ${item.prorationLabel}` : `${item.qty} × ${item.name}`}${item.dayTime ? ` (${item.dayTime})` : ""}</span>
       <span>${formatPrice(lineTotal)} <button data-id="${item.id}">remove</button></span>
     `;
     container.appendChild(row);
@@ -156,6 +247,20 @@ async function confirmSignUp() {
   const phoneInput = document.getElementById("customer-phone");
 
   if (basket.length === 0 || !nameInput.value.trim() || !emailInput.value.trim() || !phoneInput.value.trim()) return;
+
+  // Re-check capacity right before charging, in case a class filled up
+  // since the page loaded.
+  await loadEnrollmentCounts();
+  for (const item of basket) {
+    if (item.type !== "class") continue;
+    const key = `${item.name}|${item.dayTime}`;
+    const enrolled = enrollmentCounts[key] || 0;
+    if (CLASS_CAPACITY - enrolled <= 0) {
+      alert(`Sorry, ${item.name} (${item.dayTime}) has just become full. Please remove it and try another class.`);
+      renderCatalog();
+      return;
+    }
+  }
 
   const total = basket.reduce((sum, i) => sum + i.price * i.qty, 0);
 
@@ -201,6 +306,8 @@ async function confirmSignUp() {
   childInput.value = "";
   emailInput.value = "";
   phoneInput.value = "";
+  await loadEnrollmentCounts();
+  renderCatalog();
 }
 
 function setupCheckout() {
@@ -213,6 +320,9 @@ function setupCheckout() {
   document.getElementById(id).addEventListener("input", updateCheckoutAvailability);
 });
 
-renderCatalog();
-renderBasket();
-setupCheckout();
+(async function init() {
+  await loadEnrollmentCounts();
+  renderCatalog();
+  renderBasket();
+  setupCheckout();
+})();
