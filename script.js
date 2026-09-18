@@ -3,7 +3,6 @@ const SUPABASE_URL = "https://jywhymtctdnvwwvxtcpw.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_8-VfhsJiclZMwjjkZ-k18A_gLYKbaGR";
 const BUSINESS_ID = "erins-elite-dance";
 const BUSINESS_NAME = "Erin's Elite School of Dance";
-const REGISTRATION_FEE = 10.00; // annual, added once per sign-up if any class is in the basket
 
 const EMAILJS_SERVICE_ID = "service_zzjha2e";
 const EMAILJS_TEMPLATE_ID = "template_khedkjr";
@@ -13,6 +12,9 @@ const EMAILJS_PUBLIC_KEY = "fs6q7ZsiYGhRUtas5";
 // Two entries are missing a detail from what was provided — clearly
 // flagged with "TBC" rather than guessed. Fill these in once confirmed.
 const ITEMS = [
+  // Registration
+  { id: 0, section: "registration", type: "registration", name: "Annual Registration Fee", desc: "One-time yearly fee — required once per student, alongside class fees", dayTime: null, studio: null, price: 10.00 },
+
   // Baby & Minis
   { id: 1, section: "baby-minis", type: "class", name: "Baby Class", desc: "Ages 3-5", dayTime: "Thursday 4:00-5:00pm", studio: "Studio 1", price: 8.00 },
   { id: 2, section: "baby-minis", type: "class", name: "Minis", desc: "Ages 5yrs 6m - 7yrs 6m", dayTime: "Tuesday 4:00-5:00pm", studio: "Studio 1", price: 8.00 },
@@ -40,6 +42,7 @@ const ITEMS = [
 ];
 
 const SECTIONS = [
+  { key: "registration", elementId: "list-registration" },
   { key: "baby-minis", elementId: "list-baby-minis" },
   { key: "juniors", elementId: "list-juniors" },
   { key: "advanced", elementId: "list-advanced" },
@@ -104,28 +107,22 @@ function removeFromBasket(itemId) {
   renderBasket();
 }
 
-function hasClassInBasket() {
-  return basket.some(b => b.type === "class");
-}
-
 function renderBasket() {
   const container = document.getElementById("basket-items");
   const totalEl = document.getElementById("basket-total");
-  const regLine = document.getElementById("registration-line");
 
   if (basket.length === 0) {
     container.innerHTML = `<p class="empty-basket">Nothing added yet</p>`;
     totalEl.textContent = formatPrice(0);
-    regLine.classList.add("hidden");
     updateCheckoutAvailability();
     return;
   }
 
   container.innerHTML = "";
-  let subtotal = 0;
+  let total = 0;
   basket.forEach(item => {
     const lineTotal = item.price * item.qty;
-    subtotal += lineTotal;
+    total += lineTotal;
     const row = document.createElement("div");
     row.className = "basket-row";
     row.innerHTML = `
@@ -139,9 +136,6 @@ function renderBasket() {
     btn.addEventListener("click", () => removeFromBasket(Number(btn.dataset.id)));
   });
 
-  const includesRegistration = hasClassInBasket();
-  regLine.classList.toggle("hidden", !includesRegistration);
-  const total = subtotal + (includesRegistration ? REGISTRATION_FEE : 0);
   totalEl.textContent = formatPrice(total);
   updateCheckoutAvailability();
 }
@@ -163,12 +157,10 @@ async function confirmSignUp() {
 
   if (basket.length === 0 || !nameInput.value.trim() || !emailInput.value.trim() || !phoneInput.value.trim()) return;
 
-  const includesRegistration = hasClassInBasket();
-  const subtotal = basket.reduce((sum, i) => sum + i.price * i.qty, 0);
-  const total = subtotal + (includesRegistration ? REGISTRATION_FEE : 0);
+  const total = basket.reduce((sum, i) => sum + i.price * i.qty, 0);
 
-  // One row per basket item, so the owner portal shows each class/ticket
-  // as its own line, plus the registration fee as its own row if it applies.
+  // One row per basket item, so the owner portal shows each class/ticket/fee
+  // as its own line.
   const rows = basket.map(item => ({
     business_id: BUSINESS_ID,
     item_type: item.type,
@@ -182,22 +174,6 @@ async function confirmSignUp() {
     customer_email: emailInput.value.trim(),
     customer_phone: phoneInput.value.trim(),
   }));
-
-  if (includesRegistration) {
-    rows.push({
-      business_id: BUSINESS_ID,
-      item_type: "registration",
-      item_name: "Annual Registration Fee",
-      day_time: null,
-      studio: null,
-      price: REGISTRATION_FEE,
-      quantity: 1,
-      customer_name: nameInput.value.trim(),
-      child_name: childInput.value.trim() || null,
-      customer_email: emailInput.value.trim(),
-      customer_phone: phoneInput.value.trim(),
-    });
-  }
 
   const { error } = await supabaseClient.from("class_signups").insert(rows);
 
@@ -214,7 +190,7 @@ async function confirmSignUp() {
       to_name: nameInput.value.trim(),
       business_name: BUSINESS_NAME,
       email_subject: `Sign-up confirmed — ${BUSINESS_NAME}`,
-      email_body: `You're signed up with ${BUSINESS_NAME}.\n\n${summary}${includesRegistration ? "\n+ Annual Registration Fee" : ""}\nTotal: ${formatPrice(total)}`,
+      email_body: `You're signed up with ${BUSINESS_NAME}.\n\n${summary}\nTotal: ${formatPrice(total)}`,
     }).catch(err => console.error("Confirmation email failed to send:", err));
   }
 

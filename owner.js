@@ -107,25 +107,54 @@ async function loadMembers() {
     return;
   }
 
-  listEl.innerHTML = "";
+  // Group every row by dancer — a parent may have signed up in several
+  // separate visits, so this pulls it all together into one line per child
+  // (or per adult, for adult classes with no child name).
+  const groups = {};
   data.forEach(row => {
-    const el = document.createElement("div");
-    el.className = "appointment-row";
-    el.innerHTML = `
-      <div>
-        <strong>${row.customer_name}</strong>${row.child_name ? ` (for ${row.child_name})` : ""} — ${row.item_name}<br>
-        ${row.day_time ? `${row.day_time} — ${row.studio || ""}<br>` : ""}
-        ${row.quantity > 1 ? `Qty: ${row.quantity} — ` : ""}${formatPrice(row.price * row.quantity)}<br>
-        ${row.customer_phone || "No phone"} · ${row.customer_email || "No email"}
-      </div>
-      <button class="secondary-btn cancel-btn" data-id="${row.id}">Remove</button>
-    `;
-    listEl.appendChild(el);
+    const dancerName = row.child_name || row.customer_name;
+    const key = `${row.customer_email}|${dancerName}`;
+    if (!groups[key]) {
+      groups[key] = {
+        dancerName,
+        parentName: row.customer_name,
+        parentEmail: row.customer_email,
+        parentPhone: row.customer_phone,
+        classes: new Set(),
+        registrationPaid: false,
+      };
+    }
+    if (row.item_type === "class") groups[key].classes.add(row.item_name);
+    if (row.item_type === "registration") groups[key].registrationPaid = true;
   });
 
-  listEl.querySelectorAll(".cancel-btn").forEach(btn => {
-    btn.addEventListener("click", () => removeSignup(btn.dataset.id));
+  const rows = Object.values(groups);
+
+  let table = `
+    <table class="timetable-table">
+      <thead>
+        <tr>
+          <th>Dancer Name</th>
+          <th>Parent Contact</th>
+          <th>Classes Enrolled In</th>
+          <th>Registration Fee Paid</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+  rows.forEach(r => {
+    table += `
+      <tr>
+        <td>${r.dancerName}</td>
+        <td>${r.parentName}<br>${r.parentEmail}<br>${r.parentPhone}</td>
+        <td>${r.classes.size ? [...r.classes].join(", ") : "—"}</td>
+        <td>${r.registrationPaid ? "Yes" : "No"}</td>
+      </tr>
+    `;
   });
+  table += "</tbody></table>";
+
+  listEl.innerHTML = table;
 }
 
 async function removeSignup(id) {
