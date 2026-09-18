@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Erin's Elite School of Dance | Owner Portal</title>
+<link rel="icon" type="image/jpeg" href="logo.jpeg">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+        <img src="logo.jpeg" alt="Erin's Elite School of Dance logo" class="brand-mark">
+        <span class="brand-name">Erin's Elite School of Dance</span>
+      </div>
+      <p class="tagline">Owner Portal</p>
+    </div>
+  </header>
+
+  <main class="page owner-portal-page">
+
+    <section id="login-section" class="diary-section">
+      <h2>Sign In</h2>
+      <label for="login-email">Email</label>
+      <input type="email" id="login-email" placeholder="you@example.com">
+      <label for="login-password">Password</label>
+      <input type="password" id="login-password" placeholder="Password">
+      <button id="login-btn" class="checkout-btn">Sign In</button>
+      <p id="login-message" class="slot-message"></p>
+    </section>
+
+    <div id="dashboard-section" class="hidden">
+
+      <div class="portal-header">
+        <p id="signed-in-as"></p>
+        <button id="sign-out-btn" class="secondary-btn">Sign Out</button>
+      </div>
+
+      <section class="diary-section">
+        <h2>Signed-Up Students</h2>
+        <div id="members-list" class="appointments-list"></div>
+      </section>
+
+      <section class="diary-section">
+        <h2>Cancel a Class Session</h2>
+        <p class="owner-note">Cancel a specific date's class — everyone signed up for that class will be emailed.</p>
+        <label for="block-item">Class</label>
+        <select id="block-item"></select>
+        <label for="block-date">Date</label>
+        <input type="date" id="block-date">
+        <label for="block-reason">Reason (shown to parents)</label>
+        <input type="text" id="block-reason" placeholder="e.g. Instructor unavailable, half term">
+        <button id="block-btn" class="checkout-btn">Cancel This Session</button>
+        <p id="block-message" class="slot-message"></p>
+      </section>
+
+      <section class="diary-section">
+        <h2>Currently Cancelled</h2>
+        <div id="blocked-list" class="appointments-list"></div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script src="owner.js"></script>
+</body>
+</html>

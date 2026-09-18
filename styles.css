@@ -1,11 +1,12 @@
 :root {
-  --brand: #1f6f5c;
-  --brand-dark: #144a3d;
-  --bg: #f7f6f2;
-  --card: #ffffff;
-  --text: #22262b;
-  --muted: #6b7280;
-  --border: #e5e2da;
+  --brand: #d98bab;
+  --brand-dark: #b6698a;
+  --accent: #f2c9db;
+  --bg: #0b0b0d;
+  --card: #17161a;
+  --text: #f2f0f1;
+  --muted: #9a949a;
+  --border: #2c282c;
 }
 
 * { box-sizing: border-box; }
@@ -18,9 +19,10 @@ body {
 }
 
 .site-header {
-  background: var(--brand);
-  color: white;
-  padding: 24px 20px;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 0 24px rgba(217, 139, 171, 0.12);
+  padding: 20px 20px 24px;
 }
 
 .header-inner {
@@ -35,25 +37,31 @@ body {
 }
 
 .brand-mark {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #000;
+  border: 2px solid var(--brand);
 }
 
 .brand-name {
-  font-size: 22px;
+  font-size: 21px;
   font-weight: 700;
+  color: var(--brand);
 }
 
 .tagline {
   margin: 6px 0 0;
-  opacity: 0.85;
+  color: var(--muted);
   font-size: 14px;
+}
+
+.hours-line {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-style: italic;
 }
 
 .page {
@@ -73,73 +81,76 @@ body {
 }
 
 h2 {
-  font-size: 16px;
+  font-size: 15px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--muted);
+  color: var(--brand);
   margin: 0 0 12px;
+  font-weight: 700;
+}
+
+.section-spacer {
+  margin-top: 26px;
 }
 
 .product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 14px;
+  gap: 16px;
 }
 
 .product-card {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px;
+  border-radius: 14px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.product-photo {
-  width: 100%;
-  height: 110px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #e9e5da, #d9d3c4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-}
-
 .product-name {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 15px;
 }
 
 .product-desc {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--muted);
-  flex-grow: 1;
+  line-height: 1.4;
+}
+
+.product-tbc {
+  font-size: 12px;
+  color: #e0a94a;
+  font-style: italic;
 }
 
 .product-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .product-price {
+  font-size: 15px;
   font-weight: 700;
+  color: var(--accent);
 }
 
 .add-btn {
   background: var(--brand);
-  color: white;
+  color: #17161a;
   border: none;
-  border-radius: 8px;
-  padding: 6px 12px;
+  border-radius: 20px;
+  padding: 7px 16px;
   font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
 }
 
-.add-btn:hover { background: var(--brand-dark); }
+.add-btn:hover { background: var(--accent); }
 
 .basket-panel {
   background: var(--card);
@@ -178,6 +189,8 @@ h2 {
   font-size: 13px;
 }
 
+.hidden { display: none; }
+
 .basket-total-row {
   display: flex;
   justify-content: space-between;
@@ -200,27 +213,30 @@ h2 {
   color: var(--muted);
 }
 
-.slot-picker select {
+.slot-picker input {
   padding: 8px;
   border-radius: 8px;
   border: 1px solid var(--border);
+  background: #0f0e11;
+  color: var(--text);
   font-size: 14px;
 }
 
 .checkout-btn {
   width: 100%;
   background: var(--brand);
-  color: white;
+  color: #17161a;
   border: none;
   border-radius: 10px;
   padding: 12px;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
 }
 
 .checkout-btn:disabled {
-  background: #c7c2b6;
+  background: #3a373a;
+  color: var(--muted);
   cursor: not-allowed;
 }
 
@@ -231,7 +247,7 @@ h2 {
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -241,17 +257,117 @@ h2 {
 .overlay.hidden { display: none; }
 
 .confirmation-box {
-  background: white;
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: 14px;
   padding: 24px;
   max-width: 380px;
   text-align: center;
 }
 
-.confirmation-box h3 { margin-top: 0; }
+.confirmation-box h3 { margin-top: 0; color: var(--brand); }
 
 .confirmation-box p {
   color: var(--muted);
   font-size: 14px;
   line-height: 1.5;
 }
+
+.owner-portal-page {
+  grid-template-columns: 1fr !important;
+  max-width: 700px;
+}
+
+.diary-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+.owner-portal-page label {
+  font-size: 13px;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 6px;
+  margin-top: 10px;
+}
+
+.owner-portal-page input[type="email"],
+.owner-portal-page input[type="password"],
+.owner-portal-page input[type="date"],
+.owner-portal-page input[type="text"] {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #0f0e11;
+  color: var(--text);
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.owner-note {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+
+.slot-message {
+  font-size: 13px;
+  color: #e0a94a;
+  margin: 2px 0 0;
+  min-height: 16px;
+}
+
+.portal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.portal-header p {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0;
+}
+
+.secondary-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.secondary-btn:hover { background: #0f0e11; }
+
+.appointments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.appointment-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.cancel-btn {
+  border-color: #6b3a3a;
+  color: #e08a8a;
+  white-space: nowrap;
+}
+
+.cancel-btn:hover { background: rgba(224, 138, 138, 0.1); }
