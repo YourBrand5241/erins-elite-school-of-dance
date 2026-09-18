@@ -113,7 +113,6 @@ async function loadEnrollmentCounts() {
     enrollmentCounts[key] = (enrollmentCounts[key] || 0) + 1;
   });
 }
-}
 
 function renderCatalog() {
   SECTIONS.forEach(section => {
