@@ -37,9 +37,6 @@ const ITEMS = [
 
   // Stretch & Conditioning
   { id: 13, section: "conditioning", type: "class", name: "Stretch & Body Conditioning", desc: "", dayTime: "Monday 6:00-7:30pm", studio: "Studio 2", price: 12.00 },
-
-  // Events & Tickets
-  { id: 14, section: "events", type: "event", name: "Christmas Show", desc: "Details to follow", dayTime: null, studio: null, price: 10.00 },
 ];
 
 const SECTIONS = [
@@ -49,7 +46,6 @@ const SECTIONS = [
   { key: "team", elementId: "list-team" },
   { key: "acro", elementId: "list-acro" },
   { key: "conditioning", elementId: "list-conditioning" },
-  { key: "events", elementId: "list-events" },
 ];
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);

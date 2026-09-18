@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Erin's Elite School of Dance | Events &amp; Tickets</title>
+<link rel="icon" type="image/jpeg" href="logo.jpeg">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+        <img src="logo.jpeg" alt="Erin's Elite School of Dance logo" class="brand-mark">
+        <span class="brand-name">Erin's Elite School of Dance</span>
+      </div>
+      <p class="tagline">Events &amp; Tickets</p>
+      <nav class="site-nav">
+        <a href="index.html">Home</a>
+        <a href="classes.html">Classes</a>
+        <a href="timetable.html">Timetable</a>
+        <a href="events.html" class="active">Events &amp; Tickets</a>
+        <a href="gallery.html">Gallery</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="ticket-page">
+
+    <section class="diary-section">
+      <h2>Christmas Show</h2>
+      <p class="product-desc">Details to follow — check back soon for the date, time, and venue.</p>
+
+      <div class="qty-row">
+        <button class="qty-btn" id="qty-minus">−</button>
+        <span id="qty-value">1</span>
+        <button class="qty-btn" id="qty-plus">+</button>
+        <span class="product-price" id="line-total">£10.00</span>
+      </div>
+
+      <div class="slot-picker">
+        <label for="customer-name">Your name</label>
+        <input type="text" id="customer-name" placeholder="Full name">
+        <label for="customer-email">Email</label>
+        <input type="email" id="customer-email" placeholder="you@example.com">
+        <label for="customer-phone">Phone number</label>
+        <input type="tel" id="customer-phone" placeholder="e.g. 07123 456789">
+      </div>
+
+      <button id="checkout-btn" class="checkout-btn" disabled>Buy Tickets</button>
+    </section>
+
+  </main>
+
+  <div id="confirmation-overlay" class="overlay hidden">
+    <div class="confirmation-box">
+      <h3>Tickets booked!</h3>
+      <p>Your ticket order has been saved. In the live version, this step happens right after a secure Stripe payment, and you'll get a confirmation email.</p>
+      <button id="close-overlay" class="checkout-btn">Close</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script src="events.js"></script>
+</body>
+</html>

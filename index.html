@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Erin's Elite School of Dance | Sign Up</title>
+<title>Erin's Elite School of Dance</title>
 <link rel="icon" type="image/jpeg" href="logo.jpeg">
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -15,78 +15,41 @@
         <img src="logo.jpeg" alt="Erin's Elite School of Dance logo" class="brand-mark">
         <span class="brand-name">Erin's Elite School of Dance</span>
       </div>
-      <p class="tagline">Sign up for classes online in a few taps</p>
-      <p class="hours-line">A £10 annual registration fee applies once per student, alongside class fees.</p>
+      <p class="tagline">Dance classes for all ages</p>
+      <nav class="site-nav">
+        <a href="index.html" class="active">Home</a>
+        <a href="classes.html">Classes</a>
+        <a href="timetable.html">Timetable</a>
+        <a href="events.html">Events &amp; Tickets</a>
+        <a href="gallery.html">Gallery</a>
+      </nav>
     </div>
   </header>
 
-  <main class="page">
+  <main class="hero">
+    <img src="logo.jpeg" alt="Erin's Elite School of Dance">
+    <h1>Welcome to Erin's Elite School of Dance</h1>
+    <p>From our youngest baby dancers to our advanced and team classes, we offer a warm, welcoming space to learn, grow, and perform. Explore our classes, check the timetable, or get your tickets for our upcoming Christmas Show.</p>
 
-    <section class="products-section">
-      <h2>Baby &amp; Minis</h2>
-      <div id="list-baby-minis" class="product-grid"></div>
-
-      <h2 class="section-spacer">Juniors</h2>
-      <div id="list-juniors" class="product-grid"></div>
-
-      <h2 class="section-spacer">Advanced</h2>
-      <div id="list-advanced" class="product-grid"></div>
-
-      <h2 class="section-spacer">Team Classes</h2>
-      <div id="list-team" class="product-grid"></div>
-
-      <h2 class="section-spacer">Acro</h2>
-      <div id="list-acro" class="product-grid"></div>
-
-      <h2 class="section-spacer">Stretch &amp; Conditioning</h2>
-      <div id="list-conditioning" class="product-grid"></div>
-
-      <h2 class="section-spacer">Events &amp; Tickets</h2>
-      <div id="list-events" class="product-grid"></div>
-    </section>
-
-    <aside class="basket-panel">
-      <h2>Your Sign-Up</h2>
-      <div id="basket-items" class="basket-items">
-        <p class="empty-basket">Nothing added yet</p>
-      </div>
-
-      <div id="registration-line" class="basket-row hidden">
-        <span>Annual Registration Fee</span>
-        <span>£10.00</span>
-      </div>
-
-      <div class="basket-total-row">
-        <span>Total</span>
-        <span id="basket-total">£0.00</span>
-      </div>
-
-      <div class="slot-picker">
-        <label for="customer-name">Parent/Guardian name</label>
-        <input type="text" id="customer-name" placeholder="Full name">
-        <label for="child-name">Dancer's name</label>
-        <input type="text" id="child-name" placeholder="Child's name (leave blank for adult classes)">
-        <label for="customer-email">Email</label>
-        <input type="email" id="customer-email" placeholder="you@example.com">
-        <label for="customer-phone">Phone number</label>
-        <input type="tel" id="customer-phone" placeholder="e.g. 07123 456789">
-      </div>
-
-      <button id="checkout-btn" class="checkout-btn" disabled>Confirm &amp; Pay</button>
-    </aside>
-
+    <div class="hero-links">
+      <a href="classes.html" class="hero-card">
+        <div class="hero-card-title">Classes</div>
+        <div class="hero-card-desc">Sign up online</div>
+      </a>
+      <a href="timetable.html" class="hero-card">
+        <div class="hero-card-title">Timetable</div>
+        <div class="hero-card-desc">See what's on and when</div>
+      </a>
+      <a href="events.html" class="hero-card">
+        <div class="hero-card-title">Events &amp; Tickets</div>
+        <div class="hero-card-desc">Christmas Show &amp; more</div>
+      </a>
+      <a href="gallery.html" class="hero-card">
+        <div class="hero-card-title">Gallery</div>
+        <div class="hero-card-desc">See us in action</div>
+      </a>
+    </div>
   </main>
 
-  <div id="confirmation-overlay" class="overlay hidden">
-    <div class="confirmation-box">
-      <h3>You're signed up!</h3>
-      <p>Your sign-up has been saved. In the live version, this step happens right after a secure Stripe payment, and you'll get a confirmation email.</p>
-      <button id="close-overlay" class="checkout-btn">Close</button>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-  <script src="script.js"></script>
 </body>
 </html>
