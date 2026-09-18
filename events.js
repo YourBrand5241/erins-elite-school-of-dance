@@ -5,6 +5,7 @@ const BUSINESS_ID = "erins-elite-dance";
 const BUSINESS_NAME = "Erin's Elite School of Dance";
 const TICKET_PRICE = 10.00;
 const EVENT_NAME = "Christmas Show";
+const TICKET_CAP = 200;
 
 const EMAILJS_SERVICE_ID = "service_zzjha2e";
 const EMAILJS_TEMPLATE_ID = "template_khedkjr";
@@ -14,9 +15,36 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLI
 if (window.emailjs) emailjs.init(EMAILJS_PUBLIC_KEY);
 
 let qty = 1;
+let remaining = TICKET_CAP;
 
 function formatPrice(amount) {
   return `£${amount.toFixed(2)}`;
+}
+
+async function loadRemaining() {
+  const { data, error } = await supabaseClient
+    .from("public_event_tickets")
+    .select("quantity")
+    .eq("business_id", BUSINESS_ID)
+    .eq("item_name", EVENT_NAME);
+
+  const sold = error ? 0 : (data || []).reduce((sum, row) => sum + row.quantity, 0);
+  remaining = Math.max(0, TICKET_CAP - sold);
+
+  const remainingEl = document.getElementById("tickets-remaining");
+  const checkoutBtn = document.getElementById("checkout-btn");
+
+  if (remaining === 0) {
+    remainingEl.textContent = "Sold out.";
+    checkoutBtn.disabled = true;
+    document.getElementById("qty-plus").disabled = true;
+    document.getElementById("qty-minus").disabled = true;
+  } else {
+    remainingEl.textContent = `${remaining} of ${TICKET_CAP} tickets remaining.`;
+    if (qty > remaining) qty = remaining;
+    updateQtyDisplay();
+    updateCheckoutAvailability();
+  }
 }
 
 function updateQtyDisplay() {
@@ -29,15 +57,25 @@ function updateCheckoutAvailability() {
   const emailInput = document.getElementById("customer-email");
   const phoneInput = document.getElementById("customer-phone");
   const checkoutBtn = document.getElementById("checkout-btn");
-  checkoutBtn.disabled = !nameInput.value.trim() || !emailInput.value.trim() || !phoneInput.value.trim();
+  checkoutBtn.disabled = remaining === 0
+    || !nameInput.value.trim() || !emailInput.value.trim() || !phoneInput.value.trim();
 }
 
 async function confirmPurchase() {
   const nameInput = document.getElementById("customer-name");
   const emailInput = document.getElementById("customer-email");
   const phoneInput = document.getElementById("customer-phone");
+  const message = document.getElementById("ticket-message");
 
   if (!nameInput.value.trim() || !emailInput.value.trim() || !phoneInput.value.trim()) return;
+
+  // Re-check right before charging, in case tickets sold out in the
+  // time since the page loaded.
+  await loadRemaining();
+  if (qty > remaining) {
+    message.textContent = `Sorry, only ${remaining} ticket${remaining === 1 ? "" : "s"} left — please adjust your quantity.`;
+    return;
+  }
 
   const total = TICKET_PRICE * qty;
 
@@ -72,19 +110,19 @@ async function confirmPurchase() {
   }
 
   document.getElementById("confirmation-overlay").classList.remove("hidden");
+  message.textContent = "";
   qty = 1;
-  updateQtyDisplay();
   nameInput.value = "";
   emailInput.value = "";
   phoneInput.value = "";
-  updateCheckoutAvailability();
+  await loadRemaining();
 }
 
 document.getElementById("qty-minus").addEventListener("click", () => {
   if (qty > 1) { qty--; updateQtyDisplay(); }
 });
 document.getElementById("qty-plus").addEventListener("click", () => {
-  qty++; updateQtyDisplay();
+  if (qty < remaining) { qty++; updateQtyDisplay(); }
 });
 ["customer-name", "customer-email", "customer-phone"].forEach(id => {
   document.getElementById(id).addEventListener("input", updateCheckoutAvailability);
@@ -95,3 +133,4 @@ document.getElementById("close-overlay").addEventListener("click", () => {
 });
 
 updateQtyDisplay();
+loadRemaining();
